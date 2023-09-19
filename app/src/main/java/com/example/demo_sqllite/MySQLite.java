@@ -15,9 +15,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class MySQLite extends SQLiteOpenHelper {
 
@@ -25,13 +29,14 @@ public class MySQLite extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "BHTS_DEMO.db";
     private static final int DATABASE_VERSION = 1;
     private static final String TABLE_NAME = "donvi";
-
-    private final String time_default = new SimpleDateFormat("dd-MM-yyyy HH:mm").format(Calendar.getInstance().getTime());
+    private String time_default = _GetTime();
 
 
     public MySQLite(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context;
+        System.out.println("TIME NE: "+time_default+"");
+
     }
 
 
@@ -64,19 +69,18 @@ public class MySQLite extends SQLiteOpenHelper {
         long result = db.insert(TABLE_NAME, null, cv);
         db.close();
         return result != -1;
-
-
     }
 
     public boolean _Edit_DonVi(DonVi dv)
     {
-        String time_default = new SimpleDateFormat("dd-MM-yyyy HH:mm").format(Calendar.getInstance().getTime());
         SQLiteDatabase db = this.getWritableDatabase();
-        System.out.println(dv.getTenDV());
-
-        db.execSQL("UPDATE donvi SET TenDV = '"+dv.getTenDV()+"', MoTaDV = '"+dv.getMotaDV()+"', NgayCapNhat = '"+time_default+"' WHERE id = "+dv.getID()+" ");
+        ContentValues cv = new ContentValues();
+        cv.put("TenDV", dv.getTenDV());
+        cv.put("MoTaDV", dv.getMotaDV());
+        cv.put("NgayCapNhat", time_default);
+        long result = db.update(TABLE_NAME, cv, "ID = ?", new String[]{String.valueOf(dv.getID())});
         db.close();
-        return true;
+        return result != -1;
     }
 
     public boolean _Delete_DonVi(int ID)
@@ -86,6 +90,8 @@ public class MySQLite extends SQLiteOpenHelper {
         db.close();
         return result != -1;
     }
+
+
     public List<DonVi> _Select_DonVi(){
         SQLiteDatabase db = this.getReadableDatabase();
         List<DonVi> list_donvi = new ArrayList<>();
@@ -106,6 +112,20 @@ public class MySQLite extends SQLiteOpenHelper {
 
 
 
+    private String _GetTime()
+    {
+        TimeZone timeZone = TimeZone.getTimeZone("Asia/Ho_Chi_Minh");
 
+        Calendar calendar = Calendar.getInstance(timeZone);
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        int ss = calendar.get(Calendar.SECOND);
+
+        return day+"/"+month+"/"+year+" " + hour+":"+minute+":"+ss;
+
+    }
 
 }

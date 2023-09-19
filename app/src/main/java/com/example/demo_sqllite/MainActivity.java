@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton fab_add;
     ImageView edit_1, delete_1;
     SearchView SV;
+    List<DonVi> myDonVi;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +63,27 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, ThemActivity.class);
                 startActivityForResult(intent, 99);
+
+            }
+        });
+
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent_chitiet = new Intent(MainActivity.this, ChiTietDonViActivity.class);
+                Object item = adapterView.getItemAtPosition(i);
+                if (item != null && item instanceof DonVi) {
+                    DonVi donvi = (DonVi) item;
+                    Bundle bd_donvi = new Bundle();
+                    bd_donvi.putInt("ID", donvi.getID());
+                    bd_donvi.putString("TenDV", donvi.getTenDV());
+                    bd_donvi.putString("MoTaDV", donvi.getMotaDV());
+                    bd_donvi.putString("NgayTao", donvi.getNgayTao());
+                    bd_donvi.putString("NgayCapNhat", donvi.getNgayCapNhat());
+                    intent_chitiet.putExtra("DuLieu_DonVi", bd_donvi);
+                }
+                startActivity(intent_chitiet);
             }
         });
 
@@ -90,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     void Show_Data()
     {
-        List<DonVi> myDonVi = mySQLite._Select_DonVi();
+        myDonVi = mySQLite._Select_DonVi();
         adapter_donVi = new Adapter_DonVi(MainActivity.this, R.layout.listview_layout, myDonVi);
         lv.setAdapter(adapter_donVi);
 
